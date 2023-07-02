@@ -39,22 +39,28 @@ const TerminalSimulator = () => {
   const [typedText, setTypedText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isWaiting, setIsWaiting] = useState(false);
 
   useEffect(() => {
     let currentIdea = currentIndex % ideas.length;
     let fullText = introductionText + ideas[currentIdea];
+
+    if (isWaiting) return; // Don't do anything if we're waiting after typing out a text
+
     let timeoutLength = isDeleting ? 10 : 30; // Speed up when deleting
 
     const timerId = setTimeout(() => {
       if (!isDeleting && typedText === fullText) {
-        // If we're not currently deleting and the full text has been typed out, start deleting
-        setIsDeleting(true);
+        setIsWaiting(true); // Start the pause
+        setTimeout(() => {
+          // After 2 seconds, start deleting
+          setIsWaiting(false);
+          setIsDeleting(true);
+        }, 2000);
       } else if (isDeleting && typedText === introductionText) {
-        // If we're currently deleting and all characters have been deleted, move to the next text and start typing
         setIsDeleting(false);
         setCurrentIndex((prevIndex) => prevIndex + 1);
       } else {
-        // Type or delete characters
         setTypedText((prevText) =>
           isDeleting
             ? prevText.slice(0, prevText.length - 1)
@@ -64,7 +70,7 @@ const TerminalSimulator = () => {
     }, timeoutLength);
 
     return () => clearTimeout(timerId); // Clear timeout on unmount
-  }, [typedText, isDeleting, introductionText, ideas, currentIndex]);
+  }, [typedText, isDeleting, isWaiting, introductionText, ideas, currentIndex]);
 
   const renderText = typedText.split("\n").map((item, key) => {
     return (
