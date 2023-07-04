@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { render } from "react-dom";
-import Image from "next/image";
 
 const TerminalSimulator = ({ step, setStep }) => {
   const introductionText = `Hello,
@@ -110,10 +109,13 @@ const TerminalSimulator = ({ step, setStep }) => {
   const [images, setImages] = useState([]);
   const [windowHeight, setWindowHeight] = useState(0);
 
+  const imgRef = useRef(); // Reference to the image element
+
   const totalImages = 637;
   const sampledImages = Math.floor(totalImages / 4);
   const scrollAmountPerImage = 10; // adjust this to the desired scroll amount per image
   const stepSize = Math.floor(totalImages / sampledImages);
+  const preloadRadius = 50; // How many images to preload on either side of the current image
 
   // Load your images
   useEffect(() => {
@@ -143,6 +145,24 @@ const TerminalSimulator = ({ step, setStep }) => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Preload images around the current index
+  useEffect(() => {
+    for (let i = -preloadRadius; i <= preloadRadius; i++) {
+      let preloadIndex = scrollPosition + i;
+      if (preloadIndex >= 0 && preloadIndex < sampledImages) {
+        let img = new Image();
+        img.src = images[preloadIndex];
+      }
+    }
+  }, [scrollPosition, images]);
+
+  // Effect to update the image src when scrollPosition changes
+  useEffect(() => {
+    if (imgRef.current) {
+      imgRef.current.src = images[scrollPosition];
+    }
+  }, [scrollPosition, images]);
+
   // Calculate opacity based on scroll position
   const opacity = 1 - scrollPosition / (sampledImages - 1);
 
@@ -157,15 +177,13 @@ const TerminalSimulator = ({ step, setStep }) => {
           />{" "}
           {/* spacer div */}
           <div className="fixed w-screen h-screen z-20 text-white overflow-hidden">
-            <div className="fixed top-0 z-90 text-red-300">
+            {/* <div className="fixed top-0 z-90 text-red-300">
               {images[scrollPosition]}
-            </div>
-            <Image
-              src={images[scrollPosition]}
+            </div> */}
+            <img
+              ref={imgRef}
               alt="Animated frame"
-              layout="fill"
-              objectFit="cover"
-              objectPosition="center center"
+              className="object-cover object-center w-full h-full"
             />
           </div>
           <div
