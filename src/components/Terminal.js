@@ -120,7 +120,7 @@ const TerminalSimulator = ({ step, setStep }) => {
     let loadedImages = [];
     for (let i = 1; i <= totalImages; i += stepSize) {
       let paddedIndex = String(i).padStart(3, "0"); // pad the index with leading zeros
-      loadedImages.push(`/images/A_${paddedIndex}.png`);
+      loadedImages.push(`/640x360/A_${paddedIndex}.png`);
     }
     setImages(loadedImages);
   }, []);
