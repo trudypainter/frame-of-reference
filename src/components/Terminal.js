@@ -115,14 +115,18 @@ const TerminalSimulator = ({ step, setStep }) => {
   const sampledImages = Math.floor(totalImages / 4);
   const scrollAmountPerImage = 10; // adjust this to the desired scroll amount per image
   const stepSize = Math.floor(totalImages / sampledImages);
-  const preloadRadius = 50; // How many images to preload on either side of the current image
 
-  // Load your images
+  // Load and preload your images
   useEffect(() => {
     let loadedImages = [];
     for (let i = 1; i <= totalImages; i += stepSize) {
       let paddedIndex = String(i).padStart(3, "0"); // pad the index with leading zeros
-      loadedImages.push(`/640x360/A_${paddedIndex}.png`);
+      let imagePath = `/640x360/A_${paddedIndex}.png`;
+      loadedImages.push(imagePath);
+
+      // Preload the image
+      let img = new Image();
+      img.src = imagePath;
     }
     setImages(loadedImages);
   }, []);
@@ -144,17 +148,6 @@ const TerminalSimulator = ({ step, setStep }) => {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Preload images around the current index
-  useEffect(() => {
-    for (let i = -preloadRadius; i <= preloadRadius; i++) {
-      let preloadIndex = scrollPosition + i;
-      if (preloadIndex >= 0 && preloadIndex < sampledImages) {
-        let img = new Image();
-        img.src = images[preloadIndex];
-      }
-    }
-  }, [scrollPosition, images]);
 
   // Effect to update the image src when scrollPosition changes
   useEffect(() => {
@@ -195,7 +188,7 @@ const TerminalSimulator = ({ step, setStep }) => {
               <p className="text-green-400">_</p>
             </div>
 
-            <div className="absolute bottom-12   flex justify-center">
+            <div className="absolute phone:bottom-24 bottom-12   flex justify-center">
               <div
                 className={`mt-4 p-4 border-white border-2 font-mono transition-opacity duration-3000 ${
                   buttonVisible ? "opacity-100" : "opacity-0"
