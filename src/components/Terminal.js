@@ -132,7 +132,7 @@ const TerminalSimulator = ({ step, setStep }) => {
       let index = Math.ceil(newPosition / scrollAmountPerImage);
       index = Math.min(sampledImages - 1, Math.max(0, index)); // Ensure index is within the range
 
-      // if the final index, set step to 2
+      // if the final index, set step to 1
       if (index === sampledImages - 1) {
         setStep(1);
       }
@@ -157,9 +157,9 @@ const TerminalSimulator = ({ step, setStep }) => {
           />{" "}
           {/* spacer div */}
           <div className="fixed w-screen h-screen z-20 text-white overflow-hidden">
-            {/* <div className="fixed top-0 z-90 text-red-300">
+            <div className="fixed top-0 z-90 text-red-300">
               {images[scrollPosition]}
-            </div> */}
+            </div>
             <Image
               src={images[scrollPosition]}
               alt="Animated frame"
