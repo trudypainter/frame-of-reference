@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { render } from "react-dom";
+import Image from "next/image";
 
-const TerminalSimulator = () => {
+const TerminalSimulator = ({ step, setStep }) => {
   const introductionText = `Hello,
       
-      Welcome to our manifestation portal, here you can materialize
-      anything you want to create, simply by willing it into action.
+      Welcome to our manifestation portal, here you can materialize anything you want to create, simply by willing it into action.
       
       Product, Service, API, invention, global / local solution.
       
@@ -37,9 +37,11 @@ const TerminalSimulator = () => {
   ];
 
   const [typedText, setTypedText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isWaiting, setIsWaiting] = useState(false);
+  const [buttonVisible, setButtonVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     let currentIdea = currentIndex % ideas.length;
@@ -51,15 +53,19 @@ const TerminalSimulator = () => {
 
     const timerId = setTimeout(() => {
       if (!isDeleting && typedText === fullText) {
-        setIsWaiting(true); // Start the pause
+        setIsWaiting(true);
         setTimeout(() => {
-          // After 2 seconds, start deleting
           setIsWaiting(false);
           setIsDeleting(true);
         }, 2000);
       } else if (isDeleting && typedText === introductionText) {
         setIsDeleting(false);
-        setCurrentIndex((prevIndex) => prevIndex + 1);
+        if (currentIdea === 0) {
+          setButtonVisible(true); // Set the button as visible
+        }
+        if (currentIdea < ideas.length - 1) {
+          setCurrentIndex((prevIndex) => prevIndex + 1);
+        }
       } else {
         setTypedText((prevText) =>
           isDeleting
@@ -73,6 +79,15 @@ const TerminalSimulator = () => {
   }, [typedText, isDeleting, isWaiting, introductionText, ideas, currentIndex]);
 
   const renderText = typedText.split("\n").map((item, key) => {
+    // if its an idea, make it green
+    if (key > 6) {
+      return (
+        <span key={key}>
+          <span className="text-gray-500">{item}</span>
+          <br />
+        </span>
+      );
+    }
     return (
       <span key={key}>
         {item}
@@ -81,11 +96,100 @@ const TerminalSimulator = () => {
     );
   });
 
+  // handle proceed clicked, set proceedClicked to true
+  const handleProceedClicked = () => {
+    setIsVisible(false);
+
+    // after 1.5 seconds, set step to 1
+    setTimeout(() => {
+      setStep(1);
+    }, 1500);
+  };
+
+  const [scrollPosition, setScrollPosition] = useState(1);
+  const [images, setImages] = useState([]);
+  const [windowHeight, setWindowHeight] = useState(0);
+
+  const totalImages = 637;
+  const sampledImages = Math.floor(totalImages / 4);
+  const scrollAmountPerImage = 10; // adjust this to the desired scroll amount per image
+  const stepSize = Math.floor(totalImages / sampledImages);
+
+  // Load your images
+  useEffect(() => {
+    let loadedImages = [];
+    for (let i = 1; i <= totalImages; i += stepSize) {
+      let paddedIndex = String(i).padStart(3, "0"); // pad the index with leading zeros
+      loadedImages.push(`/images/A_${paddedIndex}.png`);
+    }
+    setImages(loadedImages);
+  }, []);
+
+  // Event listener for scroll events
+  useEffect(() => {
+    const onScroll = () => {
+      let newPosition = window.pageYOffset;
+      let index = Math.ceil(newPosition / scrollAmountPerImage);
+      index = Math.min(sampledImages - 1, Math.max(0, index)); // Ensure index is within the range
+
+      // if the final index, set step to 2
+      if (index === sampledImages - 1) {
+        setStep(1);
+      }
+
+      setScrollPosition(index);
+    };
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Calculate opacity based on scroll position
+  const opacity = 1 - scrollPosition / (sampledImages - 1);
+
   return (
-    <div className="bg-black text-white rounded w-[400px] p-8 max-w-11/12 font-mono">
-      <p>{renderText}</p>
-      <p className="text-green-400">_</p>
-    </div>
+    <>
+      {step === 0 && (
+        <>
+          <div
+            style={{
+              height: `${totalImages * sampledImages}px`,
+            }}
+          />{" "}
+          {/* spacer div */}
+          <div className="fixed w-screen h-screen z-20 text-white overflow-hidden">
+            {/* <div className="fixed top-0 z-90 text-red-300">
+              {images[scrollPosition]}
+            </div> */}
+            <Image
+              src={images[scrollPosition]}
+              alt="Animated frame"
+              layout="fill"
+              objectFit="cover"
+              objectPosition="center center"
+            />
+          </div>
+          <div
+            style={{ opacity: opacity }}
+            className={`fixed h-screen w-full p-12 flex justify-center `}
+          >
+            <div className="bg-black text-white w-[400px] pt-8 max-w-11/12 font-mono">
+              <p>{renderText}</p>
+              <p className="text-green-400">_</p>
+            </div>
+
+            <div className="absolute bottom-12   flex justify-center">
+              <div
+                className={`mt-4 p-4 border-white border-2 font-mono transition-opacity duration-3000 ${
+                  buttonVisible ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                Scroll to Proceed
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 };
 
