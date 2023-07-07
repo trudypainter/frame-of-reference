@@ -20,6 +20,10 @@ module.exports = {
         1500: "1500ms",
         3000: "3000ms",
       },
+      outline: {
+        none: ["focus"],
+      },
+      caretColor: ["focus"],
     },
   },
   plugins: [],
