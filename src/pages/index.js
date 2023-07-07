@@ -4,6 +4,10 @@ import TerminalSimulator from "@/components/Terminal";
 import { useState } from "react";
 import SelectOption from "@/components/SelectOption";
 import Product from "@/components/Product";
+import Service from "@/components/Service";
+import API from "@/components/API";
+import Invention from "@/components/Invention";
+import Solution from "@/components/Solution";
 
 export default function Home() {
   // use state to keep track of the step of the user journey
@@ -26,6 +30,10 @@ export default function Home() {
             <SelectOption step={step} setStep={setStep} />
           )}
           {step === 2 && <Product step={step} setStep={setStep} />}
+          {step === 3 && <Service step={step} setStep={setStep} />}
+          {step === 4 && <API step={step} setStep={setStep} />}
+          {step === 5 && <Invention step={step} setStep={setStep} />}
+          {step === 6 && <Solution step={step} setStep={setStep} />}
         </div>
       </main>
     </>
