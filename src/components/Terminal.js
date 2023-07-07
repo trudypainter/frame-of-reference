@@ -119,7 +119,7 @@ const TerminalSimulator = ({ step, setStep }) => {
   // Load and preload your images
   useEffect(() => {
     let loadedImages = [];
-    for (let i = 1; i <= totalImages; i += stepSize) {
+    for (let i = 0; i <= totalImages; i += stepSize) {
       let paddedIndex = String(i).padStart(3, "0"); // pad the index with leading zeros
       let imagePath = `/640x360/A_${paddedIndex}.png`;
       loadedImages.push(imagePath);
@@ -175,7 +175,6 @@ const TerminalSimulator = ({ step, setStep }) => {
             </div> */}
             <img
               ref={imgRef}
-              alt="Animated frame"
               className="object-cover object-center w-full h-full"
             />
           </div>
