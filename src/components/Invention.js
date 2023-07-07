@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
-const Invention = () => {
+const Invention = ({ step, setStep }) => {
   const questions = [
     "What would you like to invent?",
     "What is your name?",
@@ -14,11 +14,18 @@ const Invention = () => {
   const [delayComplete, setDelayComplete] = useState(false);
   const [typingComplete, setTypingComplete] = useState(false);
   const [finalMessageTyped, setFinalMessageTyped] = useState(false);
+  const [inputFadeIn, setInputFadeIn] = useState(false);
+  const [manifestationClicked, setManifestationClicked] = useState(false);
   const inputRef = useRef(null);
 
   const handleUserAnswer = (event) => {
     if (event.key === "Enter") {
       console.log("enter");
+
+      // if not final message typed
+      if (!finalMessageTyped) {
+        setInputFadeIn(false);
+      }
 
       // if the user has typed the final message, then we don't want to do anything
       if (finalMessageTyped) {
@@ -43,7 +50,7 @@ const Invention = () => {
     if (!delayComplete) {
       const initialDelayId = setTimeout(() => {
         setDelayComplete(true);
-      }, 500);
+      }, 100);
 
       return () => clearTimeout(initialDelayId);
     }
@@ -60,6 +67,9 @@ const Invention = () => {
         ]);
         setTypingComplete(true);
         setTypedText("");
+        setTimeout(() => {
+          setInputFadeIn(true);
+        }, 200);
       } else {
         setTypedText(
           (prevText) => prevText + questions[currentQuestion][prevText.length]
@@ -78,8 +88,21 @@ const Invention = () => {
     }
   };
 
+  const handleManifestationClicked = () => {
+    setManifestationClicked(true);
+    setTimeout(() => {
+      setStep(7);
+    }, 3000);
+  };
+
   return (
-    <div className="bg-black text-white w-[400px] pt-8 max-w-11/12 font-mono">
+    <div className={`bg-black text-white w-[400px] pt-8 max-w-11/12 font-mono`}>
+      <div
+        className={`fixed top-0 left-0  w-screen bg-black
+        transition-opacity duration-3000 
+        ${manifestationClicked ? "opacity-100 h-screen" : "opacity-0 h-0"}
+      `}
+      ></div>
       {messages.map((message, index) => (
         <p
           key={index}
@@ -92,7 +115,12 @@ const Invention = () => {
       {typingComplete && (
         <textarea
           type="text"
-          className="text-gray-400 my-1 w-full resize-none bg-black border-0 focus:outline-none caret-gray-200 "
+          placeholder="Type your answer here..."
+          className={`text-gray-400 my-1 placeholder-gray-400 w-full 
+          resize-none bg-black border-0 focus:outline-none caret-gray-200 
+          transition-opacity duration-1000 ${
+            inputFadeIn ? "opacity-100" : "opacity-0"
+          }`}
           value={userAnswer}
           onChange={(e) => handleTextAreaChange(e)}
           onKeyDown={handleUserAnswer}
@@ -101,7 +129,10 @@ const Invention = () => {
         />
       )}
       {finalMessageTyped && (
-        <div className="border-2 p-4 hover:cursor-pointer hover:bg-gray-800 border-white text-center">
+        <div
+          onClick={() => handleManifestationClicked()}
+          className="border-2 p-4 hover:cursor-pointer hover:bg-gray-800 border-white text-center"
+        >
           Send Manifestaion
         </div>
       )}

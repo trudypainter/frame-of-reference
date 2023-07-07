@@ -8,6 +8,7 @@ import Service from "@/components/Service";
 import API from "@/components/API";
 import Invention from "@/components/Invention";
 import Solution from "@/components/Solution";
+import ThankYou from "@/components/ThankYou";
 
 export default function Home() {
   // use state to keep track of the step of the user journey
@@ -34,6 +35,8 @@ export default function Home() {
           {step === 4 && <API step={step} setStep={setStep} />}
           {step === 5 && <Invention step={step} setStep={setStep} />}
           {step === 6 && <Solution step={step} setStep={setStep} />}
+
+          {step === 7 && <ThankYou step={step} setStep={setStep} />}
         </div>
       </main>
     </>
