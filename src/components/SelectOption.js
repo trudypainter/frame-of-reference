@@ -106,8 +106,8 @@ const SelectOption = ({ step, setStep }) => {
   });
 
   return (
-    <>
-      <div className="bg-black text-white w-[400px] pt-8 max-w-11/12 font-mono h-48">
+    <div className="h-fit">
+      <div className=" text-white w-[400px] pt-8 max-w-11/12 font-mono h-48">
         <p>{renderText}</p>
       </div>
 
@@ -167,7 +167,7 @@ const SelectOption = ({ step, setStep }) => {
           Solution
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

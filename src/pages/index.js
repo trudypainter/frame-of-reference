@@ -25,7 +25,7 @@ export default function Home() {
       >
         {step === 0 && <TerminalSimulator step={step} setStep={setStep} />}
         <div
-          className={`fixed h-screen overflow-scroll w-full p-12 flex  items-center flex-col  `}
+          className={`fixed h-screen overflow-scroll w-full p-12 flex  items-center flex-col pb-24`}
         >
           {[1, 2, 3, 4, 5, 6].includes(step) && (
             <SelectOption step={step} setStep={setStep} />

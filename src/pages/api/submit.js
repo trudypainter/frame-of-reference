@@ -3,30 +3,34 @@ import { google } from "googleapis";
 export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
-      const { client_email, private_key } = JSON.parse(
-        process.env.GOOGLE_SERVICE_ACCOUNT
+      const target = ["https://www.googleapis.com/auth/spreadsheets"];
+      const jwt = new google.auth.JWT(
+        process.env.GOOGLE_CLIENT_EMAIL,
+        null,
+        (process.env.GOOGLE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
+        target
       );
-      const doc = new google.auth.JWT({
-        email: client_email,
-        key: private_key,
-        scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-      });
+      const sheets = google.sheets({ version: "v4", auth: jwt });
 
-      const sheets = google.sheets({ version: "v4", auth: doc });
+      // POST body contains the data from the form
+      // It should look like this:
+      // {
+      //   "sheet": "Product",
+      //   "answers": [["answer 1", "answer 2", "answer 3"]]
+      // }
+      const { sheet, answers } = req.body;
 
       const { data } = await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.SPREADSHEET_ID,
-        range: "Sheet1", // update this with your sheet name
+        range: sheet, // using provided sheet name
         valueInputOption: "RAW",
         insertDataOption: "INSERT_ROWS",
         resource: {
-          values: [
-            // your values here
-          ],
+          values: [answers], // using the provided values,
         },
       });
 
-      res.status(200).json({ success: true });
+      res.status(200).json({ success: true, data: data });
     } catch (error) {
       res.status(500).json({ error: "Error writing to Google Sheet" });
     }

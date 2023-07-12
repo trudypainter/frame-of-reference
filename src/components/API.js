@@ -19,27 +19,35 @@ const API = ({ step, setStep }) => {
   const [manifestationClicked, setManifestationClicked] = useState(false);
   const inputRef = useRef(null);
 
+  // need to save the user's answers to the questions
+  const [answers, setAnswers] = useState([]);
+
+  const proceedToNextStep = () => {
+    // if not final message typed
+    if (!finalMessageTyped) {
+      setInputFadeIn(false);
+    }
+
+    // if the user has typed the final message, then we don't want to do anything
+    if (finalMessageTyped) {
+      return;
+    }
+
+    setTypingComplete(false);
+    setMessages((prev) => [...prev, { text: userAnswer, isUser: true }]);
+    setUserAnswer("");
+    setDelayComplete(false); // reset the delayComplete state
+    if (currentQuestion + 1 < questions.length) {
+      setCurrentQuestion((prev) => prev + 1);
+    }
+
+    // save the user's answer
+    setAnswers((prev) => [...prev, userAnswer]);
+  };
+
   const handleUserAnswer = (event) => {
     if (event.key === "Enter") {
-      console.log("enter");
-
-      // if not final message typed
-      if (!finalMessageTyped) {
-        setInputFadeIn(false);
-      }
-
-      // if the user has typed the final message, then we don't want to do anything
-      if (finalMessageTyped) {
-        return;
-      }
-
-      setTypingComplete(false);
-      setMessages((prev) => [...prev, { text: userAnswer, isUser: true }]);
-      setUserAnswer("");
-      setDelayComplete(false); // reset the delayComplete state
-      if (currentQuestion + 1 < questions.length) {
-        setCurrentQuestion((prev) => prev + 1);
-      }
+      proceedToNextStep();
     }
   };
 
@@ -94,6 +102,20 @@ const API = ({ step, setStep }) => {
     setTimeout(() => {
       setStep(7);
     }, 3000);
+
+    // save the user's answer
+    fetch("/api/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sheet: "API",
+        answers: [...answers, userAnswer],
+      }),
+    }).then((res) => {
+      console.log("res", res);
+    });
   };
 
   return (
@@ -107,32 +129,45 @@ const API = ({ step, setStep }) => {
       {messages.map((message, index) => (
         <p
           key={index}
-          className={message.isUser ? "text-gray-400 mt-1 mb-8" : ""}
+          className={`max-w-full ${
+            message.isUser ? "text-gray-400 mt-1 mb-8" : ""
+          }`}
         >
           {message.text}
         </p>
       ))}
       <p>{typedText} </p>
       {typingComplete && (
-        <textarea
-          type="text"
-          placeholder="Type your answer here..."
-          className={`text-gray-400 my-1 placeholder-gray-400 w-full 
+        <div className="flex">
+          <textarea
+            type="text"
+            placeholder="Type your answer here..."
+            className={`text-gray-400 my-1 placeholder-gray-400 w-full 
           resize-none bg-black border-0 focus:outline-none caret-gray-200 
           transition-opacity duration-1000 ${
             inputFadeIn ? "opacity-100" : "opacity-0"
           }`}
-          value={userAnswer}
-          onChange={(e) => handleTextAreaChange(e)}
-          onKeyDown={handleUserAnswer}
-          ref={inputRef}
-          autoFocus
-        />
+            value={userAnswer}
+            onChange={(e) => handleTextAreaChange(e)}
+            onKeyDown={handleUserAnswer}
+            ref={inputRef}
+            autoFocus
+          />
+          {userAnswer.length > 0 &&
+            currentQuestion + 1 !== questions.length && (
+              <div
+                onClick={() => proceedToNextStep()}
+                className="px-4 py-2 border-2 h-fit border-white hover:cursor-pointer hover:bg-gray-800"
+              >
+                Next
+              </div>
+            )}
+        </div>
       )}
       {finalMessageTyped && (
         <div
           onClick={() => handleManifestationClicked()}
-          className="border-2 p-4 hover:cursor-pointer hover:bg-gray-800 border-white text-center"
+          className="border-2 p-4 hover:cursor-pointer hover:bg-gray-800 border-white text-center mt-8 mb-16"
         >
           Send Manifestaion
         </div>
