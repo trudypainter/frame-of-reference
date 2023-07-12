@@ -1,38 +1,37 @@
 import { google } from "googleapis";
 
-export default async (req, res) => {
-  try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: "path/to/your-service-account-key.json", // replace with path to your service account key file
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    });
+export default async function handler(req, res) {
+  if (req.method === "POST") {
+    try {
+      const { client_email, private_key } = JSON.parse(
+        process.env.GOOGLE_SERVICE_ACCOUNT
+      );
+      const doc = new google.auth.JWT({
+        email: client_email,
+        key: private_key,
+        scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+      });
 
-    const client = await auth.getClient();
+      const sheets = google.sheets({ version: "v4", auth: doc });
 
-    const googleSheets = google.sheets({ version: "v4", auth: client });
+      const { data } = await sheets.spreadsheets.values.append({
+        spreadsheetId: process.env.SPREADSHEET_ID,
+        range: "Sheet1", // update this with your sheet name
+        valueInputOption: "RAW",
+        insertDataOption: "INSERT_ROWS",
+        resource: {
+          values: [
+            // your values here
+          ],
+        },
+      });
 
-    const spreadsheetId = "your-spreadsheet-id"; // replace with your spreadsheet ID
-
-    const metaData = await googleSheets.spreadsheets.get({
-      auth,
-      spreadsheetId,
-    });
-
-    // Write row(s) to spreadsheet
-    await googleSheets.spreadsheets.values.append({
-      auth,
-      spreadsheetId,
-      range: "Sheet1", // replace with your sheet name
-      valueInputOption: "RAW",
-      resource: {
-        values: [
-          // your row data
-        ],
-      },
-    });
-
-    res.status(200).json({ status: "success" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+      res.status(200).json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Error writing to Google Sheet" });
+    }
+  } else {
+    res.setHeader("Allow", "POST");
+    res.status(405).end("Method Not Allowed");
   }
-};
+}
