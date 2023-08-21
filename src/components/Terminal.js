@@ -71,17 +71,17 @@ const TerminalSimulator = ({ step, setStep }) => {
 
   const imgRef = useRef(); // Reference to the image element
 
-  const totalImages = 637;
+  const totalImages = 1200;
   const sampledImages = Math.floor(totalImages / 4);
-  const scrollAmountPerImage = 10; // adjust this to the desired scroll amount per image
+  const scrollAmountPerImage = 20; // adjust this to the desired scroll amount per image
   const stepSize = Math.floor(totalImages / sampledImages);
 
   // Load and preload your images
   useEffect(() => {
     let loadedImages = [];
     for (let i = 0; i <= totalImages; i += stepSize) {
-      let paddedIndex = String(i).padStart(3, "0"); // pad the index with leading zeros
-      let imagePath = `/640x360/A_${paddedIndex}.png`;
+      let paddedIndex = String(i).padStart(4, "0"); // pad the index with leading zeros
+      let imagePath = `/animation_3/640x360/AB_${paddedIndex}.png`;
       loadedImages.push(imagePath);
 
       // Preload the image
